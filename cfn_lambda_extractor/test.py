@@ -28,6 +28,11 @@ class Test(unittest.TestCase):
     def test_parse_input(self):
         self.assertEqual(cfn_lambda_extractor.parse_csv_input_values("a=1,b=2"), {"a":'1', "b":'2'})
 
+    def test_replace_values_in_line(self):
+        s = "name = ${AccountId}-${Region}"
+        v = {"AccountId": "123443211234", "Region": "us-west-2"}
+        self.assertEqual(cfn_lambda_extractor.replace_values_in_line(s, v), "name = 123443211234-us-west-2")
+
 logging.basicConfig(level=logging.WARN)
 
 if __name__ == '__main__':

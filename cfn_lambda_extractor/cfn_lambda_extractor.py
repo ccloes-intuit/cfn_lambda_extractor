@@ -18,12 +18,15 @@ def start_zip_block(line):
     return line.lstrip().startswith("ZipFile:")
 
 def valid_code(line):
-    return not line.lstrip().startswith("-")
+    if line.lstrip().startswith("-"):
+        return False
+
+    return True
 
 def replace_values_in_line(line, values):
     regex = re.match( r'^(.*)\${(.*?)}(.*)$', line)
 
-    # If the line does not include any values, return unmodified
+    # If the line does not include any values, return
     if regex == None:
         return line
 
@@ -32,7 +35,10 @@ def replace_values_in_line(line, values):
     logging.info("Replacing cfn value '{}' with '{}'.".format(value_name, val))
 
     # !! Currently asssumes all values are strings !!
-    return regex.group(1) + str(val) + regex.group(3)
+    modified_line = regex.group(1) + str(val) + regex.group(3)
+
+    # Recurse until no more variables match
+    return replace_values_in_line(modified_line, values)
 
 def replace_values(code, values):
     updated_code = {}
@@ -49,45 +55,44 @@ def format_python_code(code):
 
         logging.debug("Formatting function '{}'.".format(k))
         modified_fn = []
-        l = count_leading_spaces(v[0])
-        for line in v:
-            x = line[l:]
-            modified_fn.append(x)
-        modified_code[k] = modified_fn
+
+        num_spaces_function_indented = count_leading_spaces(v[0])
+        logging.debug("Function indented {} spaces.".format(num_spaces_function_indented))
+
+        logging.debug("Removing leading {} from every line.".format(num_spaces_function_indented))
+        modified_code[k] = [line[num_spaces_function_indented:] for line in v]
     return modified_code
 
-def load_functions(resource_data):
-    in_zip_file = False
+def load_functions_from_resource_data(resource_data):
+    in_function_body = False
     significant_white_space = 0
 
     code = {}
     count = 0
     for line in resource_data:
-        logging.debug("Starting processing line: {}".format(line))
-
-        if start_zip_block(line):
-            logging.debug("Found line starting ZipFile block")
-            in_zip_file = True
+        if start_zip_block(line) and not in_function_body:
+            logging.debug("Found line starting ZipFile block. Starting new function: {}".format(line))
+            in_function_body = True
             significant_white_space = count_leading_spaces(line)
             code[str(count)] = []
             continue
 
-        if in_zip_file and valid_code(line) == False:
-            logging.debug("Not valid code.")
+        if in_function_body and valid_code(line) == False:
+            logging.debug("Not valid code. Continuing: {}".format(line))
             continue
 
-        if in_zip_file and (significant_white_space <= count_leading_spaces(line) or line == ""):
-            logging.debug("Appending line to function.")
+        if in_function_body and (significant_white_space <= count_leading_spaces(line) or line == ""):
+            logging.debug("In Lambda body, valid code, appending line to function: {}".format(line))
             code[str(count)].append(line)
             continue
 
-        if in_zip_file:
-            logging.debug("End of function, Incremeding function count.")
+        if in_function_body:
+            logging.debug("End of function, setting in function body to false and incrementing function count: {}".format(line))
             count += 1
             significant_white_space = 0
-            in_zip_file = False
+            in_function_body = False
 
-        logging.debug("Ignoring line.")
+        logging.debug("Ignoring line: {}".format(line))
 
     logging.info("Loaded {} function(s).".format(len(code)))
 
@@ -116,12 +121,13 @@ def convert_fns_to_str(fns):
 
 def extract_functions(cfn_data, values, convert_cfn_variables=True):
     resource_data = load_resources(cfn_data)
-    fns = load_functions(resource_data)
+    fns = load_functions_from_resource_data(resource_data)
     modified_fns = format_python_code(fns)
     replaced_values = replace_values(modified_fns, values)
     return convert_fns_to_str(replaced_values)
 
 def parse_csv_input_values(input_values):
+    logging.debug("Paring input '{}'.".format(input_values))
     result = {}
 
     if input_values != "":
