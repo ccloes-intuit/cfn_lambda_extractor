@@ -37,7 +37,7 @@ def replace_values_in_line(line, values):
     # !! Currently asssumes all values are strings !!
     modified_line = regex.group(1) + str(val) + regex.group(3)
 
-    # Recurse until no more variables match
+    # Recur until no more variables match
     return replace_values_in_line(modified_line, values)
 
 def replace_values(code, values):
