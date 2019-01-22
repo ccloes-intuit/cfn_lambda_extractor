@@ -58,7 +58,7 @@ INFO:root:Completed processing cfn template.
 
 Lots of opportunity to improve me...
 
-* Only supports YAML
-* Only supports Pythong functions
-* Only supports replacement of ${VAR} style cfn substituation,
-* No other psuedo parameters or replacements
+* Only supports YAML.
+* Only supports Pythong functions.
+* Only supports replacement of ${VAR} style cfn substituation (not Fn::Sub style or other variables).
+* No other psuedo parameters or replacements.
