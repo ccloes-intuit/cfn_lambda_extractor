@@ -3,6 +3,22 @@
 AWS Cloudformation allows you to include [Lambda function code inline](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-lambda-function-code.html)
 within your Cloudformation template.
 
+For example:
+
+```yaml
+TestFunction1:
+  Type: AWS::Lambda::Function
+  Properties:
+    Code:
+      ZipFile: |
+        def handler(event, context):
+            val = ${ValueToSub1}
+            print("This is a test with value '{}'.".format(val))
+    Handler: index.handler
+    Role: !GetAtt MyRole.Arn
+    Runtime: python3.6
+```
+
 This is great for incorporating custom resource code direcxtly within your Cloudformation
 templates, however the code is difficult to test.
 
