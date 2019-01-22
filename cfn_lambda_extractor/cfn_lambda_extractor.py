@@ -18,32 +18,26 @@ def start_zip_block(line):
     return line.lstrip().startswith("ZipFile:")
 
 def valid_code(line):
-    if line.lstrip().startswith("-"):
-        return False
+    return not line.lstrip().startswith("-")
 
-    return True
+def replace_values_in_line(line, values):
+    regex = re.match( r'^(.*)\${(.*?)}(.*)$', line)
 
-def replace_values_in_function(fn_code, values):
-    updated_fn = []
-    for line in fn_code:
-        regex = re.match( r'^(.*)\${(.*?)}(.*)$', line)
+    # If the line does not include any values, return unmodified
+    if regex == None:
+        return line
 
-        if regex == None:
-            updated_fn.append(line)
-            continue
+    value_name = regex.group(2)
+    val = values.get(value_name, "UNKNOWN")
+    logging.info("Replacing cfn value '{}' with '{}'.".format(value_name, val))
 
-        value_name = regex.group(2)
-        val = values.get(value_name, "UNKNOWN")
-        logging.info("Replacing cfn value '{}' with '{}'.".format(value_name, val))
-        l = regex.group(1) + str(val) + regex.group(3) # !! Currently asssumes all values are strings !!
-        updated_fn.append(l)
-
-    return updated_fn
+    # !! Currently asssumes all values are strings !!
+    return regex.group(1) + str(val) + regex.group(3)
 
 def replace_values(code, values):
     updated_code = {}
     for fn_name, fn_code in code.items():
-        updated_code[fn_name] = replace_values_in_function(fn_code, values)
+        updated_code[fn_name] = [replace_values_in_line(l, values) for l in fn_code]
     return updated_code
 
 def format_python_code(code):
