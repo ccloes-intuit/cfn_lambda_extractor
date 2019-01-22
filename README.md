@@ -10,10 +10,12 @@ TestFunction1:
   Type: AWS::Lambda::Function
   Properties:
     Code:
-      ZipFile: |
-        def handler(event, context):
-            val = ${ValueToSub1}
-            print("This is a test with value '{}'.".format(val))
+      ZipFile: !Sub
+        - |
+          def handler(event, context):
+              val = ${ValueToSub1}
+              print("This is a test with value '{}'.".format(val))
+        - ValueToSub1: "test1234"
     Handler: index.handler
     Role: !GetAtt MyRole.Arn
     Runtime: python3.6
