@@ -29,6 +29,9 @@ will parse your AWS Cloudformation templates, remove inline code, replace variab
 populated by [sub](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-sub.html)
 statement, and write the modified template to a directory for testing.
 
+See [example](https://github.com/bw-intuit/cfn_lambda_extractor/tree/master/example) directory for a full working
+example of extracting, replacing variables and finally testing inline Lambda code.
+
 ## Installation
 
 ```shell

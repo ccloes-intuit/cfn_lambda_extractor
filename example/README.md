@@ -3,6 +3,8 @@
 I am an example of extracting, replacing variables and testing a lambda function from a 
 Cloudformation template.
 
+To use, run **test.sh**.
+
 ```
 $ bash test.sh
 INFO:root:Loading input from file 'cfn.yaml'.
