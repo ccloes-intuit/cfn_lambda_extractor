@@ -112,10 +112,7 @@ def load_resources(cfn_data):
     return result
 
 def convert_fns_to_str(fns):
-    r = {}
-    for k, v in fns.items():
-        r[k] = "\n".join(v)
-    return r
+    return {k: "\n".join(v) for (k, v) in fns.items()}
 
 def extract_functions(cfn_data, values, convert_cfn_variables=True):
     resource_data = load_resources(cfn_data)
@@ -127,11 +124,8 @@ def extract_functions(cfn_data, values, convert_cfn_variables=True):
 def parse_csv_input_values(input_values):
     result = {}
 
-    if input_values == "":
-        return result
+    if input_values != "":
+        result = {v[0]: v[1] for v in [v.split("=") for v in input_values.split(",")]}
 
-    x = [v.split("=") for v in input_values.split(",")]
-    y = [{v[0]: v[1]} for v in x]
-    [result.update(pair) for pair in y]
     logging.debug("Parsed following values '{}'.".format(result))
     return result
