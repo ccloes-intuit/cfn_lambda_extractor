@@ -131,7 +131,7 @@ def parse_csv_input_values(input_values):
     result = {}
 
     if input_values != "":
-        result = {v[0]: v[1] for v in [v.split("=") for v in input_values.split(",")]}
+        result = {x[0]: x[1] for x in [v.split("=") for v in input_values.split(",")]}
 
     logging.debug("Parsed following values '{}'.".format(result))
     return result
