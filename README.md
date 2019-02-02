@@ -21,7 +21,7 @@ TestFunction1:
     Runtime: python3.6
 ```
 
-This is great for incorporating custom resource code direcxtly within your Cloudformation
+This is great for incorporating custom resource code directly within your Cloudformation
 templates, however the code is difficult to test.
 
 To support extracting and testing code included in your Cloudformation template, **cfn_lambda_extractor**
